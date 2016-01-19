@@ -61,35 +61,44 @@ namespace VanDerWaerdenGame.DesktopApp
 
             this.TMax = int.Parse(parameters["tmax"]);
             this.TMin = int.Parse(parameters["tmin"]);
-
-            TrainPositionPlayer();
-
-            if (parameters["opponent"].Equals("mean", StringComparison.InvariantCultureIgnoreCase) || parameters["opponent"].Equals("both", StringComparison.InvariantCultureIgnoreCase))
+            try
             {
-                this.GameManager.Player2 = new MeanColorPlayer(rules);
-                TestPlayers(string.Format("r{0}_k{1}_step{2:00000}_itperstep{3:0000}_tmax{4:000}_tmin{5:000}_{6}{7}.csv",
-                    rules.NColors, rules.EndGameProgressionLength,
-                    this.StepSize*10000, this.NStepGames,
-                    this.TMax, this.TMin,
-                    "mean",
-                    parameters.ContainsKey("try") ? parameters["try"] : ""
-                    ));
+                TrainPositionPlayer();
+
+                if (parameters["opponent"].Equals("mean", StringComparison.InvariantCultureIgnoreCase) || parameters["opponent"].Equals("both", StringComparison.InvariantCultureIgnoreCase))
+                {
+                    this.GameManager.Player2 = new MeanColorPlayer(rules);
+                    TestPlayers(string.Format("r{0}_k{1}_step{2:00000}_itperstep{3:0000}_tmax{4:000}_tmin{5:000}_{6}{7}.csv",
+                        rules.NColors, rules.EndGameProgressionLength,
+                        this.StepSize * 10000, this.NStepGames,
+                        this.TMax, this.TMin,
+                        "mean",
+                        parameters.ContainsKey("try") ? parameters["try"] : ""
+                        ));
+                }
+                if (parameters["opponent"].Equals("rand", StringComparison.InvariantCultureIgnoreCase) || parameters["opponent"].Equals("both", StringComparison.InvariantCultureIgnoreCase))
+                {
+                    this.GameManager.Player2 = new RandomColorPlayer(rules);
+                    TestPlayers(string.Format("r{0}_k{1}_step{2:00000}_itperstep{3:0000}_tmax{4:000}_tmin{5:000}_{6}{7}.csv",
+                        rules.NColors, rules.EndGameProgressionLength,
+                        this.StepSize * 10000, this.NStepGames,
+                        this.TMax, this.TMin,
+                        "rand",
+                        parameters.ContainsKey("try") ? parameters["try"] : ""
+                        ));
+                }
+                else
+                    throw new ArgumentException("You have not provided proper value of opponent paramerter (mean/rand/both)");
             }
-            if (parameters["opponent"].Equals("rand", StringComparison.InvariantCultureIgnoreCase) || parameters["opponent"].Equals("both", StringComparison.InvariantCultureIgnoreCase))
+            catch (Exception e)
             {
-                this.GameManager.Player2 = new RandomColorPlayer(rules);
-                TestPlayers(string.Format("r{0}_k{1}_step{2:00000}_itperstep{3:0000}_tmax{4:000}_tmin{5:000}_{6}{7}.csv",
-                    rules.NColors, rules.EndGameProgressionLength,
-                    this.StepSize*10000, this.NStepGames,
-                    this.TMax, this.TMin,
-                    "rand",
-                    parameters.ContainsKey("try") ? parameters["try"] : ""
-                    ));
+                Console.WriteLine(e.Message);
+                Console.WriteLine(e.StackTrace);
             }
-            else
-                throw new ArgumentException("You have not provided proper value of opponent paramerter (mean/rand/both)");
-            
-            App.Current.Shutdown();
+            finally
+            {
+                App.Current.Shutdown();
+            }
         }
 
         public List<IColorPlayer> ColorPlayers { get; set; }
